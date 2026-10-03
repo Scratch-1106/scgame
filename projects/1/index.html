@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイクラ風サバイバル - スクゲーム</title>
+    <meta name="description" content="Scratchで遊べる3D視点のマイクラ風サバイバルゲーム『マイクラ風サバイバル』の紹介・プレイページです。">
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; color: #4f46e5; }
+        header h1 a { text-decoration: none; color: inherit; }
+        
+        .container {
+            max-width: 900px;
+            width: 90%;
+            margin: 30px 0;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            box-sizing: border-box;
+        }
+        .game-title { font-size: 1.8rem; margin-top: 0; color: #1e293b; }
+        .game-meta { font-size: 0.9rem; color: #64748b; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .game-frame-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            background: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .game-frame-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        .section-title { font-size: 1.2rem; border-left: 4px solid #4f46e5; padding-left: 10px; margin-top: 30px; color: #0f172a; }
+        .game-desc { line-height: 1.8; color: #334155; font-size: 0.95rem; }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 20px;
+            background-color: #f1f5f9;
+            color: #4f46e5;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .btn-back:hover { background-color: #e2e8f0; }
+
+        footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><a href="/">スクゲーム</a></h1>
+    </header>
+
+    <div class="container">
+        <h1 class="game-title">マイクラ風サバイバル</h1>
+        <div class="game-meta">📅 投稿日: 2026/10/01 | 👤 作者: ScratchユーザーA | 🔥 プレイ数: 1,500回</div>
+
+        <div class="game-frame-wrapper">
+            <!-- 埋め込むScratchプロジェクトのIDを指定 -->
+            <iframe src="https://scratch.mit.edu/projects/123456789/embed" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen></iframe>
+        </div>
+
+        <h2 class="section-title">🕹️ 操作方法・解説</h2>
+        <div class="game-desc">
+            <p>広大なブロックの世界を冒険して、素材を集めて家を建てたり敵と戦ったりしよう！</p>
+            <ul>
+                <li><strong>【WASD】</strong>：移動</li>
+                <li><strong>【左クリック】</strong>：ブロックを壊す・攻撃</li>
+                <li><strong>【右クリック】</strong>：ブロックを置く</li>
+                <li><strong>【スペース】</strong>：ジャンプ</li>
+            </ul>
+        </div>
+
+        <a href="/search.html" class="btn-back">← ゲーム一覧に戻る</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Scratch-1106.</p>
+    </footer>
+
+</body>
+</html>
