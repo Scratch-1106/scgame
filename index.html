@@ -52,10 +52,7 @@
 
         .container { max-width: 1200px; width: 90%; padding: 30px 0; box-sizing: border-box; }
         
-        /* 🔍 検索バー */
-        .search-container {
-            margin-bottom: 30px;
-        }
+        .search-container { margin-bottom: 30px; }
         .search-form {
             display: flex;
             gap: 10px;
@@ -66,9 +63,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             transition: border-color 0.2s;
         }
-        .search-form:focus-within {
-            border-color: #4f46e5;
-        }
+        .search-form:focus-within { border-color: #4f46e5; }
         .search-input {
             flex: 1;
             border: none;
@@ -88,9 +83,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .search-button:hover {
-            background-color: #4338ca;
-        }
+        .search-button:hover { background-color: #4338ca; }
 
         .section-title { font-size: 1.4rem; margin-bottom: 20px; border-left: 4px solid #4f46e5; padding-left: 12px; color: #1e293b; font-weight: bold; }
         .tag-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 35px; background-color: #ffffff; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; }
@@ -135,49 +128,41 @@
         </div>
         <nav>
             <a href="/">ホーム</a>
-            <a href="/search">ゲーム一覧</a>
+            <a href="/search.html">ゲーム一覧</a>
             <a href="#news-section">お知らせ</a>
             <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
         </nav>
     </header>
 
     <div class="container">
-        <!--検索-->
         <div class="search-container">
-            <form action="/search" method="get" class="search-form">
+            <form action="/search.html" method="get" class="search-form">
                 <input type="text" name="q" class="search-input" placeholder="ゲーム名やキーワードを入力..." aria-label="ゲーム検索">
                 <button type="submit" class="search-button">検索</button>
             </form>
         </div>
 
-        <!--タグ-->
         <h2 class="section-title">🔍 タグから探す</h2>
         <div class="tag-container">
-            <a href="/search?q=マイクラ" class="tag-link">#マイクラ系</a>
-            <a href="/search?q=アクション" class="tag-link">#アクション</a>
-            <a href="/search?q=音ゲー" class="tag-link">#音ゲー</a>
+            <a href="/search.html?q=マイクラ" class="tag-link">#マイクラ系</a>
+            <a href="/search.html?q=アクション" class="tag-link">#アクション</a>
+            <a href="/search.html?q=音ゲー" class="tag-link">#音ゲー</a>
         </div>
 
-        <!--今日のおすすめ作品-->
         <h2 class="section-title">⚡ 今日のおすすめ作品</h2>
-        <a href="https://mit.edu" target="_blank" class="pickup-box">
+        <a href="./projects/1/" class="pickup-box">
             <div class="pickup-thumb">★ TODAY'S PICKUP</div>
             <div class="pickup-info">
-                <h3>ここに今日おすすめするゲームのタイトル</h3>
-                <p class="pickup-desc">ここに今日一番アピールしたいゲームの詳しいレビューを書いてください。</p>
+                <h3>マイクラ風サバイバル</h3>
+                <p class="pickup-desc">広大な3D世界を冒険して、素材を集めて自分だけの秘密基地を作ろう！</p>
             </div>
         </a>
 
-        <!--お知らせコーナー-->
         <h2 class="section-title" id="news-section">📢 運営からのお知らせ</h2>
         <div class="news-box">
             <div class="news-item">
                 <span class="news-date">2026/10/03</span>
-                <span class="news-text">お知らせ1</span>
-            </div>
-            <div class="news-item">
-                <span class="news-date">2026/10/03</span>
-                <span class="news-text">お知らせ2</span>
+                <span class="news-text">サイトをオープンしました！</span>
             </div>
         </div>
     </div>
