@@ -25,6 +25,32 @@
             width: 100%;
         }
 
+        /* ★ヘッダー用スタイルの補完 */
+        header {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-logo-area { display: flex; align-items: baseline; gap: 15px; }
+        header h1 { margin: 0; font-size: 1.5rem; font-weight: bold; color: #4f46e5; }
+        header h1 a { text-decoration: none; color: inherit; }
+        header .site-desc { margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500; }
+        
+        nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        nav a { color: #475569; text-decoration: none; font-size: 0.95rem; font-weight: bold; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        nav a:hover { color: #4f46e5; background-color: #f1f5f9; }
+        nav a.btn-request { background-color: #4f46e5; color: #ffffff; }
+        nav a.btn-request:hover { background-color: #4338ca; color: #ffffff; transform: translateY(-1px); }
+
+        /* コンテナ */
         .container {
             max-width: 1200px;
             width: 90%;
@@ -162,7 +188,7 @@
             })
             .catch(err => console.error('フッター読み込みエラー:', err));
 
-        // 2. 全ニュースの取得と表示（全件表示）
+        // 2. 全ニュースの取得と表示
         fetch('/news.json')
             .then(res => res.json())
             .then(data => {
