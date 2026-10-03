@@ -119,6 +119,38 @@
         footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
     </style>
 </head>
+    <script>
+    // ★おすすめに指定したいゲームの ID を設定（例: ID 1 をおすすめにする）
+    const RECOMMEND_GAME_ID = 1;
+
+    fetch('/games.json')
+        .then(response => response.json())
+        .then(data => {
+            if (!data || data.length === 0) return;
+
+            // 指定した ID の作品を探す（見つからなければ先頭の作品を表示）
+            const recommendGame = data.find(item => item.id === RECOMMEND_GAME_ID) || data[0];
+
+            // IDに対応するHTML要素の中身を上書き
+            if (document.getElementById('recTitle')) {
+                document.getElementById('recTitle').innerText = recommendGame.title;
+            }
+            if (document.getElementById('recMeta')) {
+                document.getElementById('recMeta').innerText = `📅 ${recommendGame.date} | 👤 作者: ${recommendGame.author} | 🔥 ${recommendGame.views.toLocaleString()}回再生`;
+            }
+            if (document.getElementById('recDesc')) {
+                document.getElementById('recDesc').innerText = recommendGame.desc;
+            }
+            if (document.getElementById('recLink')) {
+                document.getElementById('recLink').href = recommendGame.url;
+            }
+            if (document.getElementById('recTags')) {
+                const tagsHtml = (recommendGame.tags || []).map(t => `<a href="/search?tag=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join(' ');
+                document.getElementById('recTags').innerHTML = tagsHtml;
+            }
+        })
+        .catch(err => console.error('おすすめゲームの読み込みエラー:', err));
+</script>
 <body>
 
     <header>
