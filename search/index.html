@@ -159,15 +159,33 @@
 <script>
     let gamesData = [];
 
+    // URLのパラメータ(?tag=xxx や ?q=xxx)を取得する関数
+    function getQueryParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('tag') || urlParams.get('q') || urlParams.get('search') || '';
+    }
+
     // games.json からデータを取得
     fetch('/games.json')
         .then(response => response.json())
         .then(data => {
             gamesData = data;
-            renderGames(gamesData);
+
+            // URLに検索パラメータがあれば、検索ボックスにセットする
+            const initialQuery = getQueryParam();
+            if (initialQuery) {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.value = initialQuery;
+                }
+            }
+
+            // 検索・描画を実行
+            filterGames();
         })
         .catch(err => console.error('データの取得に失敗しました:', err));
 
+    // 画面にゲーム一覧を描画する関数
     function renderGames(data) {
         const grid = document.getElementById('gameGrid');
         grid.innerHTML = '';
@@ -182,7 +200,8 @@
             card.className = 'game-card';
             card.href = game.url;
 
-            const tagsHtml = (game.tags || []).map(t => `<span class="tag">#${t}</span>`).join('');
+            // タグをクリックした時に search.html?tag=タグ名 に飛ぶリンクにする
+            const tagsHtml = (game.tags || []).map(t => `<a href="/search?tag=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join('');
 
             card.innerHTML = `
                 <div class="card-title">${game.title}</div>
@@ -194,14 +213,22 @@
         });
     }
 
+    // 検索フィルター機能
     function filterGames() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        
+        if (!query) {
+            renderGames(gamesData);
+            return;
+        }
+
         const filtered = gamesData.filter(game => {
             const matchTitle = game.title.toLowerCase().includes(query);
             const matchDesc = game.desc.toLowerCase().includes(query);
             const matchTags = (game.tags || []).some(t => t.toLowerCase().includes(query));
             return matchTitle || matchDesc || matchTags;
         });
+        
         renderGames(filtered);
     }
 </script>
