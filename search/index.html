@@ -52,10 +52,7 @@
 
         .container { max-width: 1200px; width: 90%; padding: 30px 0; box-sizing: border-box; }
         
-        /* 検索バー */
-        .search-container {
-            margin-bottom: 25px;
-        }
+        .search-container { margin-bottom: 25px; }
         .search-form {
             display: flex;
             gap: 10px;
@@ -66,9 +63,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             transition: border-color 0.2s;
         }
-        .search-form:focus-within {
-            border-color: #4f46e5;
-        }
+        .search-form:focus-within { border-color: #4f46e5; }
         .search-input {
             flex: 1;
             border: none;
@@ -88,11 +83,8 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .search-button:hover {
-            background-color: #4338ca;
-        }
+        .search-button:hover { background-color: #4338ca; }
 
-        /* 検索結果コントロールバー */
         .search-header {
             display: flex;
             justify-content: space-between;
@@ -124,7 +116,6 @@
             border-color: #4f46e5;
         }
 
-        /* ゲームカード表示グリッド */
         .game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -185,22 +176,20 @@
         </div>
         <nav>
             <a href="/">ホーム</a>
-            <a href="/search">ゲーム一覧</a>
+            <a href="/search.html">ゲーム一覧</a>
             <a href="/#news-section">お知らせ</a>
             <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
         </nav>
     </header>
 
     <div class="container">
-        <!-- 🔍 再検索用フォーム -->
         <div class="search-container">
-            <form action="/search" method="get" class="search-form">
+            <form action="/search.html" method="get" class="search-form">
                 <input type="text" name="q" id="pageSearchInput" class="search-input" placeholder="ゲーム名やキーワードを入力..." aria-label="ゲーム検索">
                 <button type="submit" class="search-button">検索</button>
             </form>
         </div>
 
-        <!-- 検索結果コントロール -->
         <div class="search-header">
             <h2 class="search-title" id="searchTitle">検索結果</h2>
             <div class="sort-buttons">
@@ -209,7 +198,6 @@
             </div>
         </div>
 
-        <!-- ゲームカード一覧エリア -->
         <div class="game-grid" id="gameGrid"></div>
     </div>
 
@@ -218,48 +206,38 @@
     </footer>
 
     <script>
-        // 🎮 ゲームデータリスト（ここへ自由に追加・更新できます）
+        // 🎮 URLを /projects/1/ 形式に指定
         const gamesData = [
-            { id: 1, title: "マイクラ風サバイバル", date: "2026-10-01", views: 1500, url: "https://scratch.mit.edu/projects/1", desc: "本格的な3D視点のマイクラ風サバイバルゲーム！" },
-            { id: 2, title: "超ムズ アクションゲーム", date: "2026-10-03", views: 800, url: "https://scratch.mit.edu/projects/2", desc: "罠だらけのステージを突破する激難アクション。" },
-            { id: 3, title: "リズム音ゲー DX", date: "2026-09-25", views: 3200, url: "https://scratch.mit.edu/projects/3", desc: "楽曲に合わせてキーを押すノリノリの音ゲー！" },
-            { id: 4, title: "マイクラ2D Building", date: "2026-09-10", views: 2100, url: "https://scratch.mit.edu/projects/4", desc: "2Dで気軽に建築やブロック破壊を楽しめる作品。" },
-            { id: 5, title: "スピードレース 2026", date: "2026-08-15", views: 950, url: "https://scratch.mit.edu/projects/5", desc: "コースを最速で駆け抜ける本格レースゲーム。" }
+            { id: 1, title: "マイクラ風サバイバル", date: "2026-10-01", views: 1500, url: "./projects/1/", desc: "本格的な3D視点のマイクラ風サバイバルゲーム！" },
+            { id: 2, title: "超ムズ アクションゲーム", date: "2026-10-03", views: 800, url: "./projects/2/", desc: "罠だらけのステージを突破する激難アクション。" }
         ];
 
-        // 1. URLから検索クエリ (?q=...&sort=...) を取得
         const urlParams = new URLSearchParams(window.location.search);
         const query = urlParams.get('q') || '';
         let sortMode = urlParams.get('sort') || 'new';
 
-        // 検索窓に初期セット＆タイトルの書き換え
         document.getElementById('pageSearchInput').value = query;
         document.getElementById('searchTitle').innerText = query 
             ? `「${query}」の検索結果` 
             : 'すべてのゲーム作品';
 
-        // 2. 検索キーワードで絞り込み
         let filteredGames = gamesData.filter(game => {
             return game.title.toLowerCase().includes(query.toLowerCase()) || 
                    game.desc.toLowerCase().includes(query.toLowerCase());
         });
 
-        // 3. ソート（並び替え）処理
         function sortGames() {
             if (sortMode === 'popular') {
-                // 人気順 (プレイ数 views が多い順)
                 filteredGames.sort((a, b) => b.views - a.views);
                 document.getElementById('btnPopular').classList.add('active');
                 document.getElementById('btnNew').classList.remove('active');
             } else {
-                // 最新順 (日付 date が新しい順)
                 filteredGames.sort((a, b) => new Date(b.date) - new Date(a.date));
                 document.getElementById('btnNew').classList.add('active');
                 document.getElementById('btnPopular').classList.remove('active');
             }
         }
 
-        // 4. カードの描画
         function renderGames() {
             sortGames();
             const grid = document.getElementById('gameGrid');
@@ -273,7 +251,6 @@
             filteredGames.forEach(game => {
                 const card = document.createElement('a');
                 card.href = game.url;
-                card.target = "_blank";
                 card.className = 'game-card';
                 card.innerHTML = `
                     <div class="game-thumb">GAME THUMBNAIL</div>
@@ -288,18 +265,14 @@
             });
         }
 
-        // ソートボタン切り替え時の処理
         function changeSort(mode) {
             sortMode = mode;
-            // URLの ?sort= 描画をページ遷移なしで変更
             const newUrl = new URL(window.location);
             newUrl.searchParams.set('sort', mode);
             window.history.pushState({}, '', newUrl);
-            
             renderGames();
         }
 
-        // 初回表示の実行
         renderGames();
     </script>
 </body>
