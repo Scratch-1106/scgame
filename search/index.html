@@ -176,7 +176,7 @@
         </div>
         <nav>
             <a href="/">ホーム</a>
-            <a href="/search.html">ゲーム一覧</a>
+            <a href="/search">ゲーム一覧</a>
             <a href="/#news-section">お知らせ</a>
             <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
         </nav>
@@ -184,7 +184,8 @@
 
     <div class="container">
         <div class="search-container">
-            <form action="/search.html" method="get" class="search-form">
+            <!-- action="/search" に変更 -->
+            <form action="/search" method="get" class="search-form">
                 <input type="text" name="q" id="pageSearchInput" class="search-input" placeholder="ゲーム名やキーワードを入力..." aria-label="ゲーム検索">
                 <button type="submit" class="search-button">検索</button>
             </form>
@@ -193,8 +194,8 @@
         <div class="search-header">
             <h2 class="search-title" id="searchTitle">検索結果</h2>
             <div class="sort-buttons">
-                <button class="sort-btn" id="btnNew" onclick="changeSort('new')">最新順</button>
-                <button class="sort-btn" id="btnPopular" onclick="changeSort('popular')">人気順</button>
+                <button type="button" class="sort-btn" id="btnNew" onclick="changeSort('new')">最新順</button>
+                <button type="button" class="sort-btn" id="btnPopular" onclick="changeSort('popular')">人気順</button>
             </div>
         </div>
 
@@ -206,24 +207,27 @@
     </footer>
 
     <script>
-        // 🎮 URLを /projects/1/ 形式に指定
         const gamesData = [
-            { id: 1, title: "マイクラ風サバイバル", date: "2026-10-01", views: 1500, url: "./projects/1/", desc: "本格的な3D視点のマイクラ風サバイバルゲーム！" },
-            { id: 2, title: "超ムズ アクションゲーム", date: "2026-10-03", views: 800, url: "./projects/2/", desc: "罠だらけのステージを突破する激難アクション。" }
+            { id: 1, title: "マイクラ風サバイバル", tags: ["マイクラ", "マイクラ系", "サバイバル"], date: "2026-10-01", views: 1500, url: "/projects/1/", desc: "本格的な3D視点のマイクラ風サバイバルゲーム！" },
+            { id: 2, title: "超ムズ アクションゲーム", tags: ["アクション"], date: "2026-10-03", views: 800, url: "/projects/2/", desc: "罠だらけのステージを突破する激難アクション。" }
         ];
 
         const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('q') || '';
+        const rawQuery = urlParams.get('q') || '';
+        const query = rawQuery.trim().toLowerCase();
         let sortMode = urlParams.get('sort') || 'new';
 
-        document.getElementById('pageSearchInput').value = query;
-        document.getElementById('searchTitle').innerText = query 
-            ? `「${query}」の検索結果` 
+        document.getElementById('pageSearchInput').value = rawQuery;
+        document.getElementById('searchTitle').innerText = rawQuery 
+            ? `「${rawQuery}」の検索結果` 
             : 'すべてのゲーム作品';
 
         let filteredGames = gamesData.filter(game => {
-            return game.title.toLowerCase().includes(query.toLowerCase()) || 
-                   game.desc.toLowerCase().includes(query.toLowerCase());
+            if (!query) return true;
+            const matchTitle = game.title.toLowerCase().includes(query);
+            const matchDesc = game.desc.toLowerCase().includes(query);
+            const matchTags = game.tags && game.tags.some(tag => tag.toLowerCase().includes(query));
+            return matchTitle || matchDesc || matchTags;
         });
 
         function sortGames() {
