@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ゲーム一覧 - スクゲーム</title>
-    <meta name="description" content="TurboWarpで快適に遊べるゲーム一覧ページです。">
+    <meta name="description" content="TurboWarpで快適に遊べるゲーム一覧ページです。人気順・最新順で検索できます。">
     <style>
         body {
             background-color: #f8fafc;
@@ -61,18 +61,35 @@
             box-sizing: border-box;
         }
 
+        .search-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
         .search-box {
-            width: 100%;
+            flex: 1;
+            min-width: 200px;
             padding: 12px 15px;
             font-size: 1rem;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
-            margin-bottom: 20px;
             box-sizing: border-box;
             outline: none;
         }
-        .search-box:focus {
+        .search-box:focus, .sort-select:focus {
             border-color: #4f46e5;
+        }
+        .sort-select {
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #334155;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
         }
 
         .game-grid {
@@ -123,6 +140,10 @@
             padding: 3px 8px;
             border-radius: 4px;
             margin-right: 4px;
+            text-decoration: none;
+        }
+        .tag:hover {
+            background-color: #e0e7ff;
         }
 
         footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
@@ -145,11 +166,16 @@
 
     <div class="container">
         <h1 class="game-title" style="font-size: 1.8rem; margin-top: 0; color: #1e293b;">🔍 ゲームを探す</h1>
-        <input type="text" id="searchInput" class="search-box" placeholder="キーワードやタグで検索..." oninput="filterGames()">
         
-        <div class="game-grid" id="gameGrid">
-            <!-- ここに json から作品が自動挿入されます -->
+        <div class="search-controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="キーワードやタグで検索..." oninput="filterGames()">
+            <select id="sortSelect" class="sort-select" onchange="filterGames()">
+                <option value="popular">🔥 人気順（プレイ数）</option>
+                <option value="latest">📅 最新順（投稿日）</option>
+            </select>
         </div>
+        
+        <div class="game-grid" id="gameGrid"></div>
     </div>
 
     <footer>
@@ -159,10 +185,35 @@
 <script>
     let gamesData = [];
 
-    // URLのパラメータ(?tag=xxx や ?q=xxx)を取得する関数
-    function getQueryParam() {
+    // URLのパラメータ(?tag=xxx, ?q=xxx, ?sort=xxx)を取得する関数
+    function getQueryParams() {
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('tag') || urlParams.get('q') || urlParams.get('search') || '';
+        return {
+            query: urlParams.get('tag') || urlParams.get('q') || urlParams.get('search') || '',
+            sort: urlParams.get('sort') || 'popular'
+        };
+    }
+
+    // URLをページリロードせずに書き換える関数
+    function updateURL(query, sort) {
+        const url = new URL(window.location);
+        
+        if (query) {
+            url.searchParams.set('q', query);
+            url.searchParams.delete('tag'); // qに統一
+        } else {
+            url.searchParams.delete('q');
+            url.searchParams.delete('tag');
+        }
+
+        if (sort && sort !== 'popular') {
+            url.searchParams.set('sort', sort);
+        } else {
+            url.searchParams.delete('sort');
+        }
+
+        // ブラウザの履歴とアドレスバーの表示を更新（画面の再読み込みなし）
+        window.history.replaceState({}, '', url);
     }
 
     // games.json からデータを取得
@@ -171,17 +222,19 @@
         .then(data => {
             gamesData = data;
 
-            // URLに検索パラメータがあれば、検索ボックスにセットする
-            const initialQuery = getQueryParam();
-            if (initialQuery) {
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.value = initialQuery;
-                }
+            // 初期表示時：URLからパラメータを取得してフォームに入力
+            const params = getQueryParams();
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+
+            if (searchInput && params.query) {
+                searchInput.value = params.query;
+            }
+            if (sortSelect && params.sort) {
+                sortSelect.value = params.sort;
             }
 
-            // 検索・描画を実行
-            filterGames();
+            filterGames(false); // 初回呼び出し時はURL書き換えを行わない
         })
         .catch(err => console.error('データの取得に失敗しました:', err));
 
@@ -200,8 +253,7 @@
             card.className = 'game-card';
             card.href = game.url;
 
-            // タグをクリックした時に search.html?tag=タグ名 に飛ぶリンクにする
-            const tagsHtml = (game.tags || []).map(t => `<a href="/search?tag=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join('');
+            const tagsHtml = (game.tags || []).map(t => `<a href="/search?q=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join('');
 
             card.innerHTML = `
                 <div class="card-title">${game.title}</div>
@@ -213,22 +265,32 @@
         });
     }
 
-    // 検索フィルター機能
-    function filterGames() {
+    // 検索 ＆ 並び替え処理
+    function filterGames(shouldUpdateURL = true) {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        
-        if (!query) {
-            renderGames(gamesData);
-            return;
+        const sortType = document.getElementById('sortSelect').value;
+
+        // URLの更新
+        if (shouldUpdateURL) {
+            updateURL(query, sortType);
         }
 
-        const filtered = gamesData.filter(game => {
+        // 1. 絞り込み
+        let filtered = gamesData.filter(game => {
+            if (!query) return true;
             const matchTitle = game.title.toLowerCase().includes(query);
             const matchDesc = game.desc.toLowerCase().includes(query);
             const matchTags = (game.tags || []).some(t => t.toLowerCase().includes(query));
             return matchTitle || matchDesc || matchTags;
         });
-        
+
+        // 2. ソート
+        if (sortType === 'popular') {
+            filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+        } else if (sortType === 'latest') {
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
         renderGames(filtered);
     }
 </script>
