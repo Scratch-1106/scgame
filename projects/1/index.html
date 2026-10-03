@@ -4,56 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">作品詳細 - スクゲーム</title>
+    <meta name="description" id="pageDesc" content="TurboWarpで快適に遊べるゲームの紹介・プレイページです。">
     <style>
-        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .game-title { font-size: 24px; margin-bottom: 10px; }
-        .game-meta { font-size: 14px; color: #666; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .game-frame-wrapper { position: relative; padding-bottom: 75%; /* 4:3のアスペクト比 */ height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px; }
-        .game-frame-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .section-title { font-size: 18px; margin-top: 30px; margin-bottom: 10px; border-left: 4px solid #1a73e8; padding-left: 10px; }
-        .game-desc { line-height: 1.6; color: #333; }
-        .back-btn { display: inline-block; margin-top: 20px; color: #1a73e8; text-decoration: none; font-weight: bold; }
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
+        header {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 18px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .header-logo-area { display: flex; align-items: baseline; gap: 15px; }
+        header h1 { margin: 0; font-size: 1.5rem; font-weight: bold; color: #4f46e5; }
+        header h1 a { text-decoration: none; color: inherit; }
+        header .site-desc { margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500; }
+        
+        nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        nav a { color: #475569; text-decoration: none; font-size: 0.95rem; font-weight: bold; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        nav a:hover { color: #4f46e5; background-color: #f1f5f9; }
+
+        nav a.btn-request {
+            background-color: #4f46e5;
+            color: #ffffff;
+        }
+        nav a.btn-request:hover {
+            background-color: #4338ca;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 90%;
+            margin: 30px 0;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            box-sizing: border-box;
+        }
+        .game-title { font-size: 1.8rem; margin-top: 0; color: #1e293b; }
+        .game-meta { font-size: 0.9rem; color: #64748b; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .game-frame-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            background: #000000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .game-frame-wrapper iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        .section-title { font-size: 1.2rem; border-left: 4px solid #4f46e5; padding-left: 10px; margin-top: 30px; color: #0f172a; font-weight: bold; }
+        .game-desc { line-height: 1.8; color: #334155; font-size: 0.95rem; }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 20px;
+            background-color: #f1f5f9;
+            color: #4f46e5;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .btn-back:hover { background-color: #e2e8f0; }
+
+        footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 class="game-title" id="gameTitle">読み込み中...</h1>
-    <div class="game-meta" id="gameMeta"></div>
+    <header>
+        <div class="header-logo-area">
+            <h1><a href="/">スクゲーム</a></h1>
+            <p class="site-desc">すべてのゲームが、ここに。</p>
+        </div>
+        <nav>
+            <a href="/">ホーム</a>
+            <a href="/search">ゲーム一覧</a>
+            <a href="/#news-section">お知らせ</a>
+            <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
+        </nav>
+    </header>
 
-    <!-- ゲーム埋め込み枠 -->
-    <div class="game-frame-wrapper">
-        <iframe id="gameIframe" src="" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen></iframe>
+    <div class="container">
+        <h1 class="game-title" id="gameTitle">読み込み中...</h1>
+        <div class="game-meta" id="gameMeta"></div>
+
+        <div class="game-frame-wrapper">
+            <iframe id="gameIframe" src="" allowtransparency="true" frameborder="0" scrolling="no" allowfullscreen></iframe>
+        </div>
+
+        <h2 class="section-title">🕹️ 操作方法・解説</h2>
+        <div class="game-desc" id="gameDesc"></div>
+
+        <a href="/search" class="btn-back">← ゲーム一覧に戻る</a>
     </div>
 
-    <h2 class="section-title">🕹️ 操作方法・解説</h2>
-    <div class="game-desc" id="gameDesc"></div>
-
-    <a href="/search.html" class="back-btn">← 検索一覧に戻る</a>
-</div>
+    <footer>
+        <p>&copy; 2026 Scratch-1106.</p>
+    </footer>
 
 <script>
-    // ★作品ごとにここだけ数字を変更します（例: 作品2なら 2 にする）
+    // ★作品ごとに ID を指定（作品2なら 2 に変更）
     const CURRENT_PROJECT_ID = 1;
 
-    // games.json から自動読み込み
     fetch('/games.json')
         .then(response => response.json())
         .then(data => {
-            // IDが一致する作品データを検索
             const game = data.find(item => item.id === CURRENT_PROJECT_ID);
             
             if (game) {
-                // ページタイトルの変更
+                // タイトル・メタタグ
                 document.title = `${game.title} - スクゲーム`;
-                document.getElementById('pageTitle').innerText = `${game.title} - スクゲーム`;
-
-                // 見出し・メタ情報の反映
+                
+                // 画面上のテキストを games.json の内容で上書き
                 document.getElementById('gameTitle').innerText = game.title;
                 document.getElementById('gameMeta').innerText = `📅 投稿日: ${game.date} | 👤 作者: ${game.author} | 🔥 プレイ数: ${game.views.toLocaleString()}回`;
                 
-                // TurboWarpの埋め込みURLを設定
+                // Scratch ID から埋め込みURLを反映
                 document.getElementById('gameIframe').src = `https://turbowarp.org/${game.scratchId}/embed?autoplay=true`;
                 
                 // 操作方法・解説の組み立て
