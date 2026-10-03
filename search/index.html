@@ -112,6 +112,14 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
         }
+        .card-thumb {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            background-color: #f1f5f9;
+        }
         .card-title {
             font-size: 1.1rem;
             font-weight: bold;
@@ -200,7 +208,7 @@
         
         if (query) {
             url.searchParams.set('q', query);
-            url.searchParams.delete('tag'); // qに統一
+            url.searchParams.delete('tag');
         } else {
             url.searchParams.delete('q');
             url.searchParams.delete('tag');
@@ -212,7 +220,6 @@
             url.searchParams.delete('sort');
         }
 
-        // ブラウザの履歴とアドレスバーの表示を更新（画面の再読み込みなし）
         window.history.replaceState({}, '', url);
     }
 
@@ -222,7 +229,6 @@
         .then(data => {
             gamesData = data;
 
-            // 初期表示時：URLからパラメータを取得してフォームに入力
             const params = getQueryParams();
             const searchInput = document.getElementById('searchInput');
             const sortSelect = document.getElementById('sortSelect');
@@ -234,7 +240,7 @@
                 sortSelect.value = params.sort;
             }
 
-            filterGames(false); // 初回呼び出し時はURL書き換えを行わない
+            filterGames(false);
         })
         .catch(err => console.error('データの取得に失敗しました:', err));
 
@@ -253,9 +259,15 @@
             card.className = 'game-card';
             card.href = game.url;
 
+            // Scratch ID からサムネイル画像URLを読み込み
+            const thumbUrl = game.scratchId 
+                ? `https://uploads.scratch.mit.edu/get_image/project/${game.scratchId}_485x360.png`
+                : 'https://via.placeholder.com/485x360?text=No+Image';
+
             const tagsHtml = (game.tags || []).map(t => `<a href="/search?q=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join('');
 
             card.innerHTML = `
+                <img src="${thumbUrl}" alt="${game.title}" class="card-thumb" loading="lazy">
                 <div class="card-title">${game.title}</div>
                 <div class="card-meta">📅 ${game.date} | 🔥 ${game.views.toLocaleString()}回</div>
                 <div class="card-desc">${game.desc}</div>
@@ -270,21 +282,19 @@
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
         const sortType = document.getElementById('sortSelect').value;
 
-        // URLの更新
         if (shouldUpdateURL) {
             updateURL(query, sortType);
         }
 
-        // 1. 絞り込み
         let filtered = gamesData.filter(game => {
             if (!query) return true;
             const matchTitle = game.title.toLowerCase().includes(query);
             const matchDesc = game.desc.toLowerCase().includes(query);
+            const matchAuthor = (game.author || '').toLowerCase().includes(query);
             const matchTags = (game.tags || []).some(t => t.toLowerCase().includes(query));
-            return matchTitle || matchDesc || matchTags;
+            return matchTitle || matchDesc || matchAuthor || matchTags;
         });
 
-        // 2. ソート
         if (sortType === 'popular') {
             filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
         } else if (sortType === 'latest') {
