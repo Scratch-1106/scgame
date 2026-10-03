@@ -2,34 +2,190 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ニュース一覧 | スクゲーム</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ニュース・お知らせ一覧 | スクゲーム</title>
+    <meta name="description" content="スクゲームの最新ニュースやアップデート情報の一覧です。">
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
+
+        /* 外部読み込みパーツ用 */
+        #header-area, #footer-area {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            padding: 30px 0;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            border-left: 4px solid #4f46e5;
+            padding-left: 12px;
+            color: #1e293b;
+            font-weight: bold;
+        }
+
+        /* ニュース一覧カード */
+        .news-container {
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .news-item {
+            padding: 16px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .news-date {
+            color: #64748b;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .news-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .news-content {
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.6;
+            margin: 4px 0 0 0;
+        }
+
+        /* トップに戻るボタンエリア */
+        .back-btn-wrapper {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #f1f5f9;
+            color: #4f46e5;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background-color: #4f46e5;
+            color: #ffffff;
+            border-color: #4f46e5;
+        }
+
+        /* フッター内CSS */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
+    </style>
 </head>
 <body>
-    <!-- ヘッダー挿入用 -->
+
+    <!-- ヘッダーを自動で入れるエリア -->
     <div id="header-area"></div>
 
-    <main class="container">
-        <h1>ニュース一覧</h1>
-        <!-- 全ニュースを出力するコンテナ -->
-        <div id="all-news-list"></div>
-    </main>
+    <div class="container">
+        <h2 class="section-title">📢 ニュース・お知らせ一覧</h2>
 
-    <!-- フッター挿入用 -->
+        <div class="news-container" id="news-list">
+            <p style="color: #64748b;">読み込み中...</p>
+        </div>
+
+        <div class="back-btn-wrapper">
+            <a href="/" class="btn-back">← トップページに戻る</a>
+        </div>
+    </div>
+
+    <!-- フッターを自動で入れるエリア -->
     <div id="footer-area"></div>
 
     <script>
-        // news.json から全件取得して表示する
+        // 1. ヘッダーとフッターの外部読み込み
+        fetch('/header.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('header-area').innerHTML = data;
+            })
+            .catch(err => console.error('ヘッダー読み込みエラー:', err));
+
+        fetch('/footer.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('footer-area').innerHTML = data;
+            })
+            .catch(err => console.error('フッター読み込みエラー:', err));
+
+        // 2. 全ニュースの取得と表示（全件表示）
         fetch('/news.json')
             .then(res => res.json())
             .then(data => {
-                const list = document.getElementById('all-news-list');
-                list.innerHTML = data.map(news => `
+                const container = document.getElementById('news-list');
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color:#64748b;">現在お知らせはありません。</p>';
+                    return;
+                }
+
+                container.innerHTML = data.map(news => `
                     <div class="news-item">
-                        <span class="news-date">${news.date}</span>
+                        <div class="news-meta">
+                            <span class="news-date">📅 ${news.date}</span>
+                        </div>
                         <h3 class="news-title">${news.title}</h3>
-                        <p class="news-content">${news.content}</p>
+                        ${news.content ? `<p class="news-content">${news.content}</p>` : ''}
                     </div>
                 `).join('');
+            })
+            .catch(err => {
+                console.error('ニュース読み込みエラー:', err);
+                document.getElementById('news-list').innerHTML = '<p style="color:#ef4444;">ニュースの読み込みに失敗しました。</p>';
             });
     </script>
 </body>
