@@ -151,20 +151,32 @@
         })
         .catch(err => console.error('おすすめゲームの読み込みエラー:', err));
 </script>
+    <script>
+    // ヘッダーを読み込んで差し込む
+    fetch('/header.html')
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('header-area').innerHTML = data;
+        });
+
+    // フッターを読み込んで差し込む
+    fetch('/footer.html')
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('footer-area').innerHTML = data;
+        });
+</script>
 <body>
 
-    <header>
-        <div class="header-logo-area">
-            <h1><a href="/">スクゲーム</a></h1>
-            <p class="site-desc">すべてのゲームが、ここに。</p>
-        </div>
-        <nav>
-            <a href="/">ホーム</a>
-            <a href="/search">ゲーム一覧</a>
-            <a href="/#news-section">お知らせ</a>
-            <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
-        </nav>
-    </header>
+  <!-- ヘッダーを読み込む場所 -->
+<div id="header-area"></div>
+
+<div class="container">
+    <!-- ここに各ページの本文コンテンツ -->
+</div>
+
+<!-- フッターを読み込む場所 -->
+<div id="footer-area"></div>
 
     <div class="container">
         <div class="search-container">
