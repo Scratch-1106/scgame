@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ニュース一覧 | スクゲーム</title>
+</head>
+<body>
+    <!-- ヘッダー挿入用 -->
+    <div id="header-area"></div>
+
+    <main class="container">
+        <h1>ニュース一覧</h1>
+        <!-- 全ニュースを出力するコンテナ -->
+        <div id="all-news-list"></div>
+    </main>
+
+    <!-- フッター挿入用 -->
+    <div id="footer-area"></div>
+
+    <script>
+        // news.json から全件取得して表示する
+        fetch('/news.json')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('all-news-list');
+                list.innerHTML = data.map(news => `
+                    <div class="news-item">
+                        <span class="news-date">${news.date}</span>
+                        <h3 class="news-title">${news.title}</h3>
+                        <p class="news-content">${news.content}</p>
+                    </div>
+                `).join('');
+            });
+    </script>
+</body>
+</html>
