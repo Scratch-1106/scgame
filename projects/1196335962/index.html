@@ -115,17 +115,31 @@
     loadComponent('header-placeholder', '/header.html');
     loadComponent('footer-placeholder', '/footer.html');
 
-    // URLからScratch IDを取得 (?id=XXXXXXXX)
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('id');
+    // ID取得ロジック（?id=12345 形式 と /projects/12345 形式の両方に対応）
+    function getTargetId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryId = urlParams.get('id');
+        if (queryId) return queryId;
+
+        // URLパスから数字のID部分を取り出す (例: /projects/12345678 -> 12345678)
+        const pathMatches = window.location.pathname.match(/\/projects\/(\d+)/) || window.location.pathname.match(/\/(\d+)/);
+        return pathMatches ? pathMatches[1] : null;
+    }
+
+    const targetId = getTargetId();
 
     fetch('/games.json')
         .then(res => res.json())
         .then(games => {
-            const game = games.find(g => String(g.scratchId) === String(targetId));
+            // ID比較（文字列数値の安全な比較）
+            const game = games.find(g => 
+                String(g.scratchId) === String(targetId) || 
+                String(g.id) === String(targetId)
+            );
+            
             const container = document.getElementById('contentArea');
 
-            if (!game) {
+            if (!game || !targetId) {
                 container.innerHTML = `
                     <h2>作品が見つかりませんでした</h2>
                     <p>指定された作品IDは存在しないか、まだ追加されていません。</p>
@@ -137,12 +151,15 @@
                 return;
             }
 
-            // Googleの検索エンジンに見せるためのページのタイトルとメタ説明文を動的に書き換え
+            // タイトルとメタ説明文の動的書き換え
             const pageTitle = `${game.title} - 作者: ${game.author} | スクゲーム`;
             const pageDesc = `${game.author}作「${game.title}」のScratch作品ページです。攻略・解説情報やTurboWarpでのプレイリンクを掲載しています。`;
             
             document.title = pageTitle;
-            document.getElementById('pageMetaDesc').setAttribute('content', pageDesc);
+            const metaDescEl = document.getElementById('pageMetaDesc');
+            if (metaDescEl) {
+                metaDescEl.setAttribute('content', pageDesc);
+            }
 
             // 解説文の判定処理
             let guideContent = '';
@@ -165,7 +182,7 @@
             // 画面の組み立て
             container.innerHTML = `
                 <h1 style="font-size: 2rem; margin-bottom: 5px; color: #1e293b;">${game.title}</h1>
-                <div class="author-info">👤 作者: <strong>${game.author}</strong> | 📅 投稿日: ${game.date}</div>
+                <div class="author-info">👤 作者: <strong>${game.author}</strong> | 📅 投稿日: ${game.date || '----/--/--'}</div>
 
                 <div style="margin: 20px 0; text-align: center;">
                     <img src="https://uploads.scratch.mit.edu/get_image/project/${game.scratchId}_485x360.png" 
