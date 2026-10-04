@@ -261,9 +261,30 @@
                 if (document.getElementById('recMeta')) {
                     document.getElementById('recMeta').innerText = `📅 ${recommendGame.date || '----/--/--'} | 👤 作者: ${recommendGame.author} | 🔥 ${viewsCount}回閲覧`;
                 }
+                
+                // どんなゲームか（説明文）の自動切り出し処理
                 if (document.getElementById('recDesc')) {
-                    document.getElementById('recDesc').innerText = recommendGame.guideText || recommendGame.desc || 'Scratchで大人気の作品です！';
+                    let shortText = recommendGame.desc || '';
+                    
+                    // descが無い場合は guideText から「どんなゲーム？」の部分だけを抽出
+                    if (!shortText && recommendGame.guideText) {
+                        const tempDiv = document.createElement('div');
+                        
+                        // 最初に出てくる <hr> より前（どんなゲーム？のブロック）を取得
+                        const firstHrIndex = recommendGame.guideText.indexOf('<hr>');
+                        if (firstHrIndex !== -1) {
+                            tempDiv.innerHTML = recommendGame.guideText.substring(0, firstHrIndex);
+                        } else {
+                            tempDiv.innerHTML = recommendGame.guideText;
+                        }
+                        
+                        // HTMLタグを取り除いたテキストにし、「どんなゲーム？」という見出し文字列を削除
+                        shortText = tempDiv.textContent.replace('どんなゲーム？', '').trim();
+                    }
+
+                    document.getElementById('recDesc').innerText = shortText || 'Scratchで大人気の作品です！';
                 }
+
                 if (document.getElementById('recThumb') && scratchId) {
                     const thumb = document.getElementById('recThumb');
                     thumb.src = `https://uploads.scratch.mit.edu/get_image/project/${scratchId}_485x360.png`;
