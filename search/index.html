@@ -272,8 +272,8 @@
             card.className = 'game-card';
             
             // 遷移先URLの判定処理
-            // game.url がある場合はそれを使い、無ければ scratchId から詳細ページ（/detail.html?id=xxx）を生成
-            const targetUrl = game.url || (game.scratchId ? `/detail.html?id=${game.scratchId}` : '#');
+            // game.url がある場合はそれを使い、無ければ /projects/ScratchID 形式で生成
+            const targetUrl = game.url || (game.scratchId ? `/projects/${game.scratchId}` : '#');
 
             // カード全体のクリックで作品ページへ遷移
             card.onclick = (e) => {
