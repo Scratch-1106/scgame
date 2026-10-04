@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スクゲーム - すべてのゲームが、ここに。</title>
-    <meta name="description" content="ScratchなどのWebゲームをまとめて探せるポータルサイト「スクゲーム」。">
+    <meta name="description" content="Scratchのすべてのゲームを遊べるサイト「スクゲーム」">
     <style>
         body {
             background-color: #f8fafc;
@@ -113,24 +113,38 @@
         }
         .btn-play:hover { background-color: #4338ca; }
 
-        .news-box {
+        /* ニュースセクションのスタイル */
+        .news-section {
             background-color: #ffffff;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             padding: 20px;
             margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
         }
         .news-item {
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px dashed #e2e8f0;
             font-size: 0.95rem;
             display: flex;
             gap: 15px;
+            align-items: center;
         }
         .news-item:last-child { border-bottom: none; }
         .news-date { color: #64748b; font-weight: bold; flex-shrink: 0; }
+        .news-title { color: #1e293b; font-weight: 500; }
+        .more-news-btn-wrapper {
+            margin-top: 15px;
+            text-align: right;
+        }
+        .more-news-btn {
+            display: inline-block;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .more-news-btn:hover { color: #4338ca; text-decoration: underline; }
 
         /* フッター内CSS */
         footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
@@ -171,17 +185,18 @@
         </section>
 
         <!-- お知らせ -->
-    <section class="news-section">
-    <h2>お知らせ / ニュース</h2>
-    
-    <!-- ニュース3件の表示エリア -->
-    <div id="top-news-list"></div>
+        <section class="news-section">
+            <h2 class="section-title">📢 お知らせ / ニュース</h2>
+            
+            <!-- ニュース3件の表示エリア -->
+            <div id="top-news-list"></div>
 
-    <!-- もっと見るボタン -->
-    <div class="more-news-btn-wrapper">
-        <a href="/news" class="more-news-btn">もっと見る ➔</a>
+            <!-- もっと見るボタン -->
+            <div class="more-news-btn-wrapper">
+                <a href="/news" class="more-news-btn">もっと見る ➔</a>
+            </div>
+        </section>
     </div>
-</section>
 
     <!-- フッターを自動で入れるエリア -->
     <div id="footer-area"></div>
@@ -231,6 +246,36 @@
                 }
             })
             .catch(err => console.error('おすすめゲームの読み込みエラー:', err));
+
+        // 3. お知らせニュース（最新3件）の自動取得・表示
+        fetch('/news.json')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('top-news-list');
+                if (!container) return;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color:#64748b;">現在お知らせはありません。</p>';
+                    return;
+                }
+
+                // 最新の3件だけ取得
+                const top3News = data.slice(0, 3);
+
+                container.innerHTML = top3News.map(news => `
+                    <div class="news-item">
+                        <span class="news-date">📅 ${news.date}</span>
+                        <span class="news-title">${news.title}</span>
+                    </div>
+                `).join('');
+            })
+            .catch(err => {
+                console.error('トップページニュース読み込みエラー:', err);
+                const container = document.getElementById('top-news-list');
+                if (container) {
+                    container.innerHTML = '<p style="color:#64748b;">お知らせの読み込みに失敗しました。</p>';
+                }
+            });
     </script>
 </body>
 </html>
