@@ -58,6 +58,28 @@
             margin-bottom: 15px;
         }
 
+        .tags-area {
+            margin-top: 15px;
+        }
+
+        .tag-btn {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #4f46e5;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .tag-btn:hover {
+            background-color: #e0e7ff;
+        }
+
         .guide-box {
             margin-top: 25px;
             padding: 20px;
@@ -153,13 +175,19 @@
 
             // タイトルとメタ説明文の動的書き換え
             const pageTitle = `${game.title} - 作者: ${game.author} | スクゲーム`;
-            const pageDesc = `${game.author}作「${game.title}」のScratch作品ページです。攻略・解説情報やTurboWarpでのプレイリンクを掲載しています。`;
+            const pageDesc = `${game.author}作「${game.title}」のScratch作品ページです。攻略・解説情報やプレイリンクを掲載しています。`;
             
             document.title = pageTitle;
             const metaDescEl = document.getElementById('pageMetaDesc');
             if (metaDescEl) {
                 metaDescEl.setAttribute('content', pageDesc);
             }
+
+            // タグ一覧の生成（クリックで https://scgame.pages.dev/search/?q=タグ名 へ遷移）
+            const tagsHtml = (game.tags || []).map(tag => {
+                const encodedTag = encodeURIComponent(tag);
+                return `<a href="https://scgame.pages.dev/search/?q=${encodedTag}" class="tag-btn">#${tag}</a>`;
+            }).join('');
 
             // 解説文の判定処理
             let guideContent = '';
@@ -179,10 +207,19 @@
                 `;
             }
 
+            // 閲覧数のフォーマット（例: 1200 -> 1,200）
+            const formattedViews = (game.views || 0).toLocaleString();
+
             // 画面の組み立て
             container.innerHTML = `
                 <h1 style="font-size: 2rem; margin-bottom: 5px; color: #1e293b;">${game.title}</h1>
-                <div class="author-info">👤 作者: <strong>${game.author}</strong> | 📅 投稿日: ${game.date || '----/--/--'}</div>
+                <div class="author-info">
+                    👤 作者: <strong>${game.author}</strong> | 📅 投稿日: ${game.date || '----/--/--'} | 🔥 閲覧数: ${formattedViews}回
+                </div>
+
+                <div class="tags-area">
+                    ${tagsHtml}
+                </div>
 
                 <div style="margin: 20px 0; text-align: center;">
                     <img src="https://uploads.scratch.mit.edu/get_image/project/${game.scratchId}_485x360.png" 
@@ -191,7 +228,7 @@
                 </div>
 
                 <div style="text-align: center; margin: 20px 0;">
-                    <a href="https://turbowarp.org/${game.scratchId}" target="_blank" class="btn-apply" style="background-color: #22c55e;">▶ TurboWarpで遊ぶ</a>
+                    <a href="https://turbowarp.org/${game.scratchId}" target="_blank" class="btn-apply" style="background-color: #22c55e;">▶ Scratchで遊ぶ</a>
                 </div>
 
                 ${guideContent}
