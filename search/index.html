@@ -104,8 +104,10 @@
             padding: 18px;
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .game-card:hover {
             border-color: #4f46e5;
@@ -135,9 +137,10 @@
             font-size: 0.88rem;
             color: #334155;
             line-height: 1.5;
+            margin-bottom: 10px;
         }
         .tags {
-            margin-top: 10px;
+            margin-top: auto;
         }
         .tag {
             display: inline-block;
@@ -148,7 +151,9 @@
             padding: 3px 8px;
             border-radius: 4px;
             margin-right: 4px;
-            text-decoration: none;
+            margin-bottom: 4px;
+            cursor: pointer;
+            border: none;
         }
         .tag:hover {
             background-color: #e0e7ff;
@@ -193,7 +198,7 @@
 <script>
     let gamesData = [];
 
-    // URLのパラメータ(?tag=xxx, ?q=xxx, ?sort=xxx)を取得する関数
+    // URLのパラメータ(?tag=xxx, ?q=xxx, ?search=xxx)を取得する関数
     function getQueryParams() {
         const urlParams = new URLSearchParams(window.location.search);
         return {
@@ -225,62 +230,91 @@
 
     // games.json からデータを取得
     fetch('/games.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error("JSON読み込み失敗");
+            return response.json();
+        })
         .then(data => {
             gamesData = data;
-
-            const params = getQueryParams();
-            const searchInput = document.getElementById('searchInput');
-            const sortSelect = document.getElementById('sortSelect');
-
-            if (searchInput && params.query) {
-                searchInput.value = params.query;
-            }
-            if (sortSelect && params.sort) {
-                sortSelect.value = params.sort;
-            }
-
-            filterGames(false);
+            initSearch();
         })
-        .catch(err => console.error('データの取得に失敗しました:', err));
+        .catch(err => {
+            console.error('データの取得に失敗しました:', err);
+        });
+
+    function initSearch() {
+        const params = getQueryParams();
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (searchInput && params.query) {
+            searchInput.value = params.query;
+        }
+        if (sortSelect && params.sort) {
+            sortSelect.value = params.sort;
+        }
+
+        filterGames(false);
+    }
 
     // 画面にゲーム一覧を描画する関数
     function renderGames(data) {
         const grid = document.getElementById('gameGrid');
         grid.innerHTML = '';
 
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             grid.innerHTML = '<p style="color:#64748b;">一致するゲームが見つかりませんでした。</p>';
             return;
         }
 
         data.forEach(game => {
-            const card = document.createElement('a');
+            const card = document.createElement('div');
             card.className = 'game-card';
-            card.href = game.url;
+            
+            // カード全体のクリックで作品ページへ遷移
+            card.onclick = (e) => {
+                if (!e.target.classList.contains('tag')) {
+                    window.location.href = game.url || '#';
+                }
+            };
 
-            // Scratch ID からサムネイル画像URLを読み込み
             const thumbUrl = game.scratchId 
                 ? `https://uploads.scratch.mit.edu/get_image/project/${game.scratchId}_485x360.png`
-                : 'https://via.placeholder.com/485x360?text=No+Image';
+                : 'https://via.placeholder.com/485x360/e2e8f0/64748b?text=No+Image';
 
-            const tagsHtml = (game.tags || []).map(t => `<a href="/search?q=${encodeURIComponent(t)}" class="tag">#${t}</a>`).join('');
+            const tagsHtml = (game.tags || []).map(t => 
+                `<span class="tag" onclick="searchByTag('${t.replace(/'/g, "\\'")}')">#${t}</span>`
+            ).join('');
 
             card.innerHTML = `
-                <img src="${thumbUrl}" alt="${game.title}" class="card-thumb" loading="lazy">
-                <div class="card-title">${game.title}</div>
-                <div class="card-meta">📅 ${game.date} | 🔥 ${game.views.toLocaleString()}回</div>
-                <div class="card-desc">${game.desc}</div>
+                <img src="${thumbUrl}" alt="${game.title || ''}" class="card-thumb" loading="lazy">
+                <div class="card-title">${game.title || '無題'}</div>
+                <div class="card-meta">📅 ${game.date || '----/--/--'} | 🔥 ${(game.views || 0).toLocaleString()}回</div>
+                <div class="card-desc">${game.desc || ''}</div>
                 <div class="tags">${tagsHtml}</div>
             `;
             grid.appendChild(card);
         });
     }
 
+    // タグをクリックした時に検索窓にセットしてフィルターを実行する関数
+    function searchByTag(tagName) {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = tagName;
+            filterGames(true);
+        }
+    }
+
     // 検索 ＆ 並び替え処理
     function filterGames(shouldUpdateURL = true) {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        const sortType = document.getElementById('sortSelect').value;
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        
+        if (!searchInput || !sortSelect) return;
+
+        const query = searchInput.value.toLowerCase().trim();
+        const sortType = sortSelect.value;
 
         if (shouldUpdateURL) {
             updateURL(query, sortType);
@@ -288,17 +322,17 @@
 
         let filtered = gamesData.filter(game => {
             if (!query) return true;
-            const matchTitle = game.title.toLowerCase().includes(query);
-            const matchDesc = game.desc.toLowerCase().includes(query);
+            const matchTitle = (game.title || '').toLowerCase().includes(query);
+            const matchDesc = (game.desc || '').toLowerCase().includes(query);
             const matchAuthor = (game.author || '').toLowerCase().includes(query);
-            const matchTags = (game.tags || []).some(t => t.toLowerCase().includes(query));
+            const matchTags = (game.tags || []).some(t => String(t).toLowerCase().includes(query));
             return matchTitle || matchDesc || matchAuthor || matchTags;
         });
 
         if (sortType === 'popular') {
             filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
         } else if (sortType === 'latest') {
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            filtered.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         }
 
         renderGames(filtered);
