@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -19,6 +19,13 @@
             -webkit-tap-highlight-color: transparent;
             scroll-behavior: smooth;
         }
+
+        /* 外部読み込みパーツ用 */
+        #header-area, #footer-area {
+            width: 100%;
+        }
+
+        /* ヘッダー用スタイル */
         header {
             width: 100%;
             box-sizing: border-box;
@@ -39,16 +46,8 @@
         nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         nav a { color: #475569; text-decoration: none; font-size: 0.95rem; font-weight: bold; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
         nav a:hover { color: #4f46e5; background-color: #f1f5f9; }
-
-        nav a.btn-request {
-            background-color: #4f46e5;
-            color: #ffffff;
-        }
-        nav a.btn-request:hover {
-            background-color: #4338ca;
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
+        nav a.btn-request { background-color: #4f46e5; color: #ffffff; }
+        nav a.btn-request:hover { background-color: #4338ca; color: #ffffff; transform: translateY(-1px); }
 
         .container {
             max-width: 900px;
@@ -159,23 +158,24 @@
             background-color: #e0e7ff;
         }
 
-        footer { margin-top: auto; padding: 20px; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; width: 100%; text-align: center; box-sizing: border-box; background-color: #ffffff; }
+        /* フッター用スタイル */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-logo-area">
-            <h1><a href="/">スクゲーム</a></h1>
-            <p class="site-desc">すべてのゲームが、ここに。</p>
-        </div>
-        <nav>
-            <a href="/">ホーム</a>
-            <a href="/search">ゲーム一覧</a>
-            <a href="/#news-section">お知らせ</a>
-            <a href="https://google.com" target="_blank" class="btn-request">作品を申請する</a>
-        </nav>
-    </header>
+    <!-- ヘッダーを自動で入れるエリア -->
+    <div id="header-area"></div>
 
     <div class="container">
         <h1 class="game-title" style="font-size: 1.8rem; margin-top: 0; color: #1e293b;">🔍 ゲームを探す</h1>
@@ -191,11 +191,25 @@
         <div class="game-grid" id="gameGrid"></div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 Scratch-1106.</p>
-    </footer>
+    <!-- フッターを自動で入れるエリア -->
+    <div id="footer-area"></div>
 
 <script>
+    // 1. ヘッダーとフッターの外部読み込み
+    fetch('/header.html')
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('header-area').innerHTML = data;
+        })
+        .catch(err => console.error('ヘッダー読み込みエラー:', err));
+
+    fetch('/footer.html')
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('footer-area').innerHTML = data;
+        })
+        .catch(err => console.error('フッター読み込みエラー:', err));
+
     let gamesData = [];
 
     // URLのパラメータ(?tag=xxx, ?q=xxx, ?search=xxx)を取得する関数
@@ -272,7 +286,6 @@
             card.className = 'game-card';
             
             // 遷移先URLの判定処理
-            // game.url がある場合はそれを使い、無ければ /projects/ScratchID 形式で生成
             const targetUrl = game.url || (game.scratchId ? `/projects/${game.scratchId}` : '#');
 
             // カード全体のクリックで作品ページへ遷移
@@ -294,11 +307,24 @@
                 `<span class="tag" onclick="searchByTag('${t.replace(/'/g, "\\'")}')">#${t}</span>`
             ).join('');
 
+            // descが無い場合、guideTextの「どんなゲーム？」からテキストを自動抽出
+            let descriptionText = game.desc || '';
+            if (!descriptionText && game.guideText) {
+                const tempDiv = document.createElement('div');
+                const firstHrIndex = game.guideText.indexOf('<hr>');
+                if (firstHrIndex !== -1) {
+                    tempDiv.innerHTML = game.guideText.substring(0, firstHrIndex);
+                } else {
+                    tempDiv.innerHTML = game.guideText;
+                }
+                descriptionText = tempDiv.textContent.replace('どんなゲーム？', '').trim();
+            }
+
             card.innerHTML = `
                 <img src="${thumbUrl}" alt="${game.title || ''}" class="card-thumb" loading="lazy">
                 <div class="card-title">${game.title || '無題'}</div>
                 <div class="card-meta">📅 ${game.date || '----/--/--'} | 🔥 ${(game.views || 0).toLocaleString()}回</div>
-                <div class="card-desc">${game.desc || ''}</div>
+                <div class="card-desc">${descriptionText}</div>
                 <div class="tags">${tagsHtml}</div>
             `;
             grid.appendChild(card);
@@ -332,9 +358,10 @@
             if (!query) return true;
             const matchTitle = (game.title || '').toLowerCase().includes(query);
             const matchDesc = (game.desc || '').toLowerCase().includes(query);
+            const matchGuide = (game.guideText || '').toLowerCase().includes(query);
             const matchAuthor = (game.author || '').toLowerCase().includes(query);
             const matchTags = (game.tags || []).some(t => String(t).toLowerCase().includes(query));
-            return matchTitle || matchDesc || matchAuthor || matchTags;
+            return matchTitle || matchDesc || matchGuide || matchAuthor || matchTags;
         });
 
         if (sortType === 'popular') {
