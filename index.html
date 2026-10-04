@@ -20,7 +20,7 @@
             scroll-behavior: smooth;
         }
 
-        /* ★外部読み込みパーツが細くなるのを防ぐCSS */
+        /* 外部読み込みパーツエリア */
         #header-area, #footer-area {
             width: 100%;
         }
@@ -97,9 +97,26 @@
             padding: 20px;
             margin-bottom: 35px;
         }
-        .recommend-card h3 { margin: 10px 0 5px 0; font-size: 1.2rem; color: #4f46e5; }
+        .recommend-card-inner {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .recommend-thumb {
+            width: 240px;
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            object-fit: cover;
+        }
+        .recommend-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        .recommend-card h3 { margin: 0 0 5px 0; font-size: 1.3rem; color: #4f46e5; }
         .card-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 10px; }
-        .card-desc { font-size: 0.95rem; color: #334155; line-height: 1.6; }
+        .card-desc { font-size: 0.95rem; color: #334155; line-height: 1.6; margin-bottom: 12px; }
         .btn-play {
             display: inline-block;
             margin-top: 10px;
@@ -158,7 +175,7 @@
     <div class="container">
         <!-- 検索バー -->
         <div class="search-container">
-            <form action="/search" method="get" class="search-form">
+            <form action="https://scgame.pages.dev/search/" method="get" class="search-form">
                 <input type="text" name="q" class="search-input" placeholder="ゲーム名やキーワードを入力..." aria-label="ゲーム検索">
                 <button type="submit" class="search-button">検索</button>
             </form>
@@ -167,20 +184,25 @@
         <!-- タグから探す -->
         <h2 class="section-title">🔍 タグから探す</h2>
         <div class="tag-container">
-            <a href="/search?q=マイクラ" class="tag-link">#マイクラ系</a>
-            <a href="/search?q=アクション" class="tag-link">#アクション</a>
-            <a href="/search?q=音ゲー" class="tag-link">#音ゲー</a>
+            <a href="https://scgame.pages.dev/search/?q=%E3%83%9E%E3%82%A4%E3%82%AF%E3%83%A9" class="tag-link">#マイクラ系</a>
+            <a href="https://scgame.pages.dev/search/?q=%E3%82%A2%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3" class="tag-link">#アクション</a>
+            <a href="https://scgame.pages.dev/search/?q=%E9%9F%B3%E3%82%B2%E3%83%BC" class="tag-link">#音ゲー</a>
         </div>
 
         <!-- 今日のおすすめコーナー -->
         <section class="recommend-section">
             <h2 class="section-title">✨ 今日のおすすめゲーム</h2>
             <div class="recommend-card">
-                <h3 id="recTitle">読み込み中...</h3>
-                <p id="recMeta" class="card-meta"></p>
-                <p id="recDesc" class="card-desc"></p>
-                <div id="recTags" class="tag-container" style="background:none; border:none; padding:0; margin-bottom:10px;"></div>
-                <a id="recLink" href="#" class="btn-play">▶ 今すぐ遊ぶ</a>
+                <div class="recommend-card-inner">
+                    <img id="recThumb" src="" alt="" class="recommend-thumb" style="display: none;">
+                    <div class="recommend-info">
+                        <h3 id="recTitle">読み込み中...</h3>
+                        <p id="recMeta" class="card-meta"></p>
+                        <p id="recDesc" class="card-desc"></p>
+                        <div id="recTags" class="tag-container" style="background:none; border:none; padding:0; margin-bottom:10px;"></div>
+                        <a id="recLink" href="#" class="btn-play">▶ 今すぐ遊ぶ</a>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -218,30 +240,43 @@
             })
             .catch(err => console.error('フッター読み込みエラー:', err));
 
-        // 2. 今日のおすすめゲームの自動取得
-        const RECOMMEND_GAME_ID = 1; // おすすめにしたいゲームのID
-
+        // 2. 今日のおすすめゲームの自動取得（日付に基づく日替わり処理）
         fetch('/games.json')
             .then(response => response.json())
             .then(data => {
                 if (!data || data.length === 0) return;
 
-                const recommendGame = data.find(item => item.id === RECOMMEND_GAME_ID) || data[0];
+                // 今日の日付からインデックスを計算して日替わりで選出
+                const today = new Date();
+                const dateKey = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+                const recommendIndex = dateKey % data.length;
+                const recommendGame = data[recommendIndex];
+
+                const scratchId = recommendGame.scratchId || recommendGame.id;
+                const viewsCount = (recommendGame.views || 0).toLocaleString();
 
                 if (document.getElementById('recTitle')) {
                     document.getElementById('recTitle').innerText = recommendGame.title;
                 }
                 if (document.getElementById('recMeta')) {
-                    document.getElementById('recMeta').innerText = `📅 ${recommendGame.date} | 👤 作者: ${recommendGame.author} | 🔥 ${recommendGame.views.toLocaleString()}回再生`;
+                    document.getElementById('recMeta').innerText = `📅 ${recommendGame.date || '----/--/--'} | 👤 作者: ${recommendGame.author} | 🔥 ${viewsCount}回閲覧`;
                 }
                 if (document.getElementById('recDesc')) {
-                    document.getElementById('recDesc').innerText = recommendGame.desc;
+                    document.getElementById('recDesc').innerText = recommendGame.guideText || recommendGame.desc || 'Scratchで大人気の作品です！';
                 }
-                if (document.getElementById('recLink')) {
-                    document.getElementById('recLink').href = recommendGame.url;
+                if (document.getElementById('recThumb') && scratchId) {
+                    const thumb = document.getElementById('recThumb');
+                    thumb.src = `https://uploads.scratch.mit.edu/get_image/project/${scratchId}_485x360.png`;
+                    thumb.alt = recommendGame.title;
+                    thumb.style.display = 'block';
+                }
+                if (document.getElementById('recLink') && scratchId) {
+                    document.getElementById('recLink').href = `https://scgame.pages.dev/search/?q=${encodeURIComponent(recommendGame.title)}`;
                 }
                 if (document.getElementById('recTags')) {
-                    const tagsHtml = (recommendGame.tags || []).map(t => `<a href="/search?q=${encodeURIComponent(t)}" class="tag-link">#${t}</a>`).join(' ');
+                    const tagsHtml = (recommendGame.tags || []).map(t => 
+                        `<a href="https://scgame.pages.dev/search/?q=${encodeURIComponent(t)}" class="tag-link">#${t}</a>`
+                    ).join(' ');
                     document.getElementById('recTags').innerHTML = tagsHtml;
                 }
             })
